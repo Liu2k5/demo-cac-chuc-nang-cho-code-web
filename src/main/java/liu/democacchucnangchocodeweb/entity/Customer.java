@@ -24,9 +24,15 @@ public class Customer extends User {
     private String emailAddress;
     @Column(length = 11, unique = true)
     private String phoneNumber;
+    private boolean isEnabled;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(() -> "ROLE_CUSTOMER");
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return isEnabled;
     }
 }

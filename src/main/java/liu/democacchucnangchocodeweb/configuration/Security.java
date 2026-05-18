@@ -18,6 +18,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @Configuration
 // kích hoạt tính năng Web Security trong ứng dụng Spring Boot, cho phép cấu hình bảo mật cho các endpoint và xác thực người dùng.
@@ -36,6 +39,14 @@ public class Security {
     // "springSecurityFilterChain" trùng tên với bean mặc định của Spring Security
     public SecurityFilterChain securityFilterChain(HttpSecurity http){
         http
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Cho phép React
+                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 // cấu hình form login, chỉ định tên tham số cho tên người dùng là "email",
                 // thiết lập handler xử lý lỗi đăng nhập và URL mặc định sau khi đăng nhập thành công.
                 .formLogin(i -> i
@@ -58,13 +69,13 @@ public class Security {
                         .anyRequest().authenticated()
                 )
                 // cấu hình CSRF, bỏ qua kiểm tra CSRF cho endpoint "/webhook" để cho phép các yêu cầu từ bên ngoài mà không cần token CSRF.
-                .csrf(csrf -> csrf
-                        .ignoringRequestMatchers("/webhook")
-                )
+                .csrf(csrf -> csrf.disable())
                 // xử lí các ngoại lệ còn lại
                 .exceptionHandling(i -> i
-                        .authenticationEntryPoint(new LoginUrlAuthenticationEntryPoint("/login"))
-                        .accessDeniedHandler((request, response, accessDeniedException) -> response.sendRedirect(HOME_URL))
+                        // Thay vì redirect đến /login, trả về mã 401 Unauthorized
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                        })
                 );
 
         return http.build();
