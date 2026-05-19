@@ -4,9 +4,10 @@ import jakarta.persistence.Entity;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.Collection;
-import java.util.List;
+import java.util.Collections;
 
 @Entity
 @AllArgsConstructor
@@ -16,6 +17,6 @@ import java.util.List;
 public class Administrator extends User {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(() -> "ROLE_ADMIN");
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
     }
 }

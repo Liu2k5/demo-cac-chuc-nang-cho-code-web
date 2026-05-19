@@ -1,6 +1,5 @@
 package liu.democacchucnangchocodeweb.entity;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -10,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -22,7 +20,7 @@ import java.util.List;
 @SuperBuilder
 // Tên bảng "user" trùng từ khóa trong các cơ sở dữ liệu
 @Table(name = "users")
-public class User implements UserDetails {
+public abstract class User implements UserDetails {
     // lớp này triển khai User Details để tích hợp với Spring Security, cung cấp thông tin về người dùng cho quá trình xác thực và ủy quyền.
     @Id
     private String username;

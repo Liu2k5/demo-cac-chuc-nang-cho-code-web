@@ -2,10 +2,11 @@ package liu.democacchucnangchocodeweb.service.impl;
 
 import jakarta.transaction.Transactional;
 import liu.democacchucnangchocodeweb.entity.Customer;
-import liu.democacchucnangchocodeweb.entity.User;
+import liu.democacchucnangchocodeweb.listener.event.DisableEvent;
 import liu.democacchucnangchocodeweb.repository.CustomerRepository;
 import liu.democacchucnangchocodeweb.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomerService implements UserService {
     private final CustomerRepository customerRepository;
+    private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
     public List<Customer> findAll() {
@@ -42,5 +44,7 @@ public class CustomerService implements UserService {
         Customer customer = customerRepository.findByUsername(username);
         customer.setEnabled(false);
         customerRepository.save(customer);
+        // kích hoạt event để lisstener tại DisableListener thấy và thực hiện hành động khóa tài khoản trong Spring Security
+        applicationEventPublisher.publishEvent(new DisableEvent(customer.getUsername()));
     }
 }

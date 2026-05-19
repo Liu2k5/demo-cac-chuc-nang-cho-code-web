@@ -1,10 +1,11 @@
 package liu.democacchucnangchocodeweb.api;
 
 import liu.democacchucnangchocodeweb.entity.Customer;
-import liu.democacchucnangchocodeweb.entity.User; // Import thêm User
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -52,5 +53,15 @@ public class Api {
             e.printStackTrace();
             throw e;
         }
+    }
+
+    @GetMapping(API + "/auth/me")
+    public ResponseEntity<?> getCurrentUser(Authentication authentication) {
+        // Authentication là một đối tượng được Spring Security sử dụng để lưu trữ thông tin về người dùng đã xác thực, bao gồm tên người dùng, vai trò và các chi tiết khác.
+        // hàm này trả về thông tin của người dùng hiện tại đang đăng nhập, được lấy từ đối tượng Authentication.
+        if (authentication == null) {
+            return null;
+        }
+        return ResponseEntity.ok(authentication.getPrincipal());
     }
 }

@@ -21,13 +21,15 @@ export default function ManageCustomer() {
 
     const handleDelete = (event, username) => {
         event.preventDefault();
-        axios.delete(`/api/admin/manage-customer/${username}`).then(handleRefresh);
+        axios.delete(`/api/admin/manage-customer/${username}`).then(handleRefresh)
+            .catch(error => console.log(error));
     }
 
     const handleStatusChange = (event, username, isEnabled) => {
         event.preventDefault();
         const action = isEnabled ? 'disable' : 'enable';
-        axios.put(`/api/admin/manage-customer/${username}/${action}`).then(handleRefresh);
+        axios.put(`/api/admin/manage-customer/${username}/${action}`).then(handleRefresh)
+            .catch(error => console.log(error));
     }
 
     return (

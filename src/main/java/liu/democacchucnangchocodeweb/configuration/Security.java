@@ -11,13 +11,10 @@ import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.List;
@@ -34,7 +31,6 @@ public class Security {
     private final String[] CUSTOMER_ALLOWED = {"/customer/**", "/api/customer/**"};
 
     private final LoginRequestValidationFilter loginRequestValidationFilter;
-
     @Bean
     // "springSecurityFilterChain" trùng tên với bean mặc định của Spring Security
     public SecurityFilterChain securityFilterChain(HttpSecurity http){
@@ -50,9 +46,23 @@ public class Security {
                 // cấu hình form login, chỉ định tên tham số cho tên người dùng là "email",
                 // thiết lập handler xử lý lỗi đăng nhập và URL mặc định sau khi đăng nhập thành công.
                 .formLogin(i -> i
-                        .usernameParameter("email")
+                        .loginPage("/login")
+                        .usernameParameter("username")
                         .failureHandler(loginFailureHandler())
-                        .defaultSuccessUrl(HOME_URL, true)
+                        .successHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.getWriter().write("{\"message\": \"Login successful\"}");
+                        }))
+                // quy định địa chỉ api để thực hiện đăng xuất và các công việc cần làm để đăng xuất
+                .logout(logout -> logout
+                        .logoutUrl("/api/auth/logout") // Đường dẫn gọi logout
+                        .logoutSuccessHandler((request, response, authentication) -> {
+                            response.setStatus(HttpServletResponse.SC_OK);
+                            response.getWriter().write("{\"message\": \"Logged out successfully\"}");
+                        })
+                        .invalidateHttpSession(true) // Xóa Session
+                        .clearAuthentication(true)   // Xóa thông tin xác thực
+                        .deleteCookies("JSESSIONID") // Xóa Cookie trình duyệt
                 )
                 // cấu hình đăng nhập với oauth2, thiết lập handler xử lý lỗi đăng nhập và URL mặc định sau khi đăng nhập thành công.
 //                .oauth2Login(i -> i
@@ -60,13 +70,14 @@ public class Security {
 //                        .defaultSuccessUrl(HOME_URL, true)
 //                )
                 // thêm filter kiểm tra định dạng các trường nhập trước khi thực hiện xác thực
-                .addFilterBefore(loginRequestValidationFilter, UsernamePasswordAuthenticationFilter.class)
+//                .addFilterBefore(loginRequestValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 // phân quyền truy cập
                 .authorizeHttpRequests(i -> i
+                        .requestMatchers("/api/auth/logout").hasAnyRole("ADMIN", "CUSTOMER")
                         .requestMatchers(ALL_ALLOWED).permitAll()
                         .requestMatchers(ADMIN_ALLOWED).hasRole("ADMIN")
                         .requestMatchers(CUSTOMER_ALLOWED).hasRole("CUSTOMER")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 // cấu hình CSRF, bỏ qua kiểm tra CSRF cho endpoint "/webhook" để cho phép các yêu cầu từ bên ngoài mà không cần token CSRF.
                 .csrf(csrf -> csrf.disable())
@@ -81,15 +92,20 @@ public class Security {
         return http.build();
     }
 
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return org.springframework.security.crypto.password.NoOpPasswordEncoder.getInstance();
     }
 
     // handler xử lí lỗi đăng nhập với JSON response thay vì redirect đến trang lỗi
     public AuthenticationFailureHandler loginFailureHandler() {
         return (request, response, exception) -> {
-
+            System.out.println("Đăng nhập thất bại. Lý do: " + exception.getMessage());
             // thay vì chuyển hướng đến trang lỗi, trả về JSON với mã lỗi và thông điệp lỗi
             // giá trị SC_UNAUTHORIZED (401) được quy định sẵn làm mã trạng thái HTTP
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
