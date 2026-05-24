@@ -1,9 +1,7 @@
 package liu.democacchucnangchocodeweb.service.impl;
 
 import liu.democacchucnangchocodeweb.entity.Administrator;
-import liu.democacchucnangchocodeweb.entity.User;
 import liu.democacchucnangchocodeweb.repository.AdminRepository;
-import liu.democacchucnangchocodeweb.repository.UserRepository;
 import liu.democacchucnangchocodeweb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

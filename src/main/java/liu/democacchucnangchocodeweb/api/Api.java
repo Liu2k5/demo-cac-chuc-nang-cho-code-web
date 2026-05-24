@@ -1,6 +1,9 @@
 package liu.democacchucnangchocodeweb.api;
 
 import liu.democacchucnangchocodeweb.entity.Customer;
+import liu.democacchucnangchocodeweb.record.AiMessage;
+import liu.democacchucnangchocodeweb.record.AiMessageRecord;
+import liu.democacchucnangchocodeweb.service.AiService;
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,7 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
+
 import java.util.List;
+import java.util.ArrayList;
+import java.util.UUID;
 
 @Slf4j
 @RestController // 1. Sửa từ @Controller thành @RestController
@@ -19,6 +26,7 @@ public class Api {
     public static final String ADMIN = API + "/admin";
 
     private final CustomerService customerService;
+    private final AiService aiService;
 
     @GetMapping(ADMIN + "/manage-customer") // Đường dẫn: /api/admin/customers
     public List<Customer> getCustomers() { // 3. Sửa kiểu trả về thành List<User> cho khớp với Service
@@ -63,5 +71,38 @@ public class Api {
             return null;
         }
         return ResponseEntity.ok(authentication.getPrincipal());
+    }
+
+    @GetMapping(ADMIN + "/ai")
+    @SuppressWarnings("unchecked")
+    public List<AiMessage> Ai(HttpSession session) {
+        String conversationId = (String) session.getAttribute("conversationId");
+        List<AiMessage> conversation = (List<AiMessage>) session.getAttribute("conversation");
+        if (conversationId == null) {
+            conversationId = UUID.randomUUID().toString();
+            session.setAttribute("conversationId", conversationId);
+        }
+        if (conversation == null) {
+            conversation = new ArrayList<>();
+            session.setAttribute("conversation", conversation);
+        }
+        return conversation;
+    }
+
+    @PostMapping(ADMIN + "/ai")
+    @SuppressWarnings("unchecked")
+    public ResponseEntity<List<AiMessage>> Ai(
+        @RequestBody AiMessageRecord request,
+        HttpSession session
+    ) {
+        String conversationId = (String) session.getAttribute("conversationId");
+        if (conversationId == null) {
+            conversationId = UUID.randomUUID().toString();
+            session.setAttribute("conversationId", conversationId);
+        }
+        List<AiMessage> conversation = (List<AiMessage>) session.getAttribute("conversation");
+        conversation = aiService.ask(conversationId, request.question(), conversation);
+        session.setAttribute("conversation", conversation);
+        return ResponseEntity.ok(conversation);
     }
 }

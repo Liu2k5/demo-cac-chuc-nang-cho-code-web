@@ -35,14 +35,16 @@ public class Security {
     // "springSecurityFilterChain" trùng tên với bean mặc định của Spring Security
     public SecurityFilterChain securityFilterChain(HttpSecurity http){
         http
-                .cors(cors -> cors.configurationSource(request -> {
-                    CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Cho phép React
-                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-                    config.setAllowedHeaders(List.of("*"));
-                    config.setAllowCredentials(true);
-                    return config;
-                }))
+                // cho phép cổng khác giao tiếp với backend, cấu hình CORS để cho phép các yêu cầu từ "http://localhost:3000" (địa chỉ của ứng dụng React) và cho phép tất cả các phương thức HTTP, tiêu đề và cookie.
+                // nếu cấu hình proxy tại frontend (trong tệp frontend/src/package.json) sử dụng luôn cổng 8080 thì cấu hình này không cần thiết nữa
+//                .cors(cors -> cors.configurationSource(request -> {
+//                    CorsConfiguration config = new CorsConfiguration();
+//                    config.setAllowedOrigins(List.of("http://localhost:3000")); // Cho phép React
+//                    config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+//                    config.setAllowedHeaders(List.of("*"));
+//                    config.setAllowCredentials(true);
+//                    return config;
+//                }))
                 // cấu hình form login, chỉ định tên tham số cho tên người dùng là "email",
                 // thiết lập handler xử lý lỗi đăng nhập và URL mặc định sau khi đăng nhập thành công.
                 .formLogin(i -> i
