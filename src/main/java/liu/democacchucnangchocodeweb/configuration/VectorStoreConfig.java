@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class VectorStoreConfig {
 
-    @Value("${spring.ai.vectorstore.pinecone.apiKey")
+    @Value("${spring.ai.vectorstore.pinecone.apiKey}")
     private String apiKey;
 
     @Value("${spring.ai.vectorstore.pinecone.index-name}")
