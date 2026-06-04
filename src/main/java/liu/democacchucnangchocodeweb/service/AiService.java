@@ -11,12 +11,16 @@ import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
+import lombok.extern.slf4j.Slf4j;
+
 
 import io.pinecone.clients.Index;
 import liu.democacchucnangchocodeweb.record.AiMessage;
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
+import liu.democacchucnangchocodeweb.tool.CustomerTool;
 
 @Service
+@Slf4j
 @SuppressWarnings("unused")
 public class AiService {
 
@@ -29,15 +33,18 @@ public class AiService {
             .build();
     private final Index pineconeIndex;
     private final ChatModel chatModel;
+    private final CustomerTool customerTool;
 
     public AiService(
                     ChatModel chatModel,
                     VectorStore vectorStore,
-                    CustomerService customerService) {
+                    CustomerService customerService,
+                    CustomerTool customerTool) {
         this.customerService = customerService;
         this.vectorStore = vectorStore;
         this.pineconeIndex = null;
         this.chatModel = chatModel;
+        this.customerTool = customerTool;
 
         this.chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)
@@ -48,7 +55,11 @@ public class AiService {
 
     private final static String systemPrompt = """
             tưởng tượng bạn là một a.i chatbot của một hệ thống quản lí khách hàng của một công ti. 
-            công việc của bạn đơn giản là đếm số lượng tài khoản trên hệ thống.
+            công việc của bạn đơn giản như sau:
+            - đếm số lượng tài khoản trên hệ thống.
+            - kiểm tra tên hiển thị của khách hàng theo username; trả về tên hoặc 'NOT_FOUND'
+            - kích hoạt tài khoản khách hàng theo username
+            - vô hiệu hóa tài khoản khách hàng theo username
             """;
 
     public List<AiMessage> ask(String conversationId, String question, List<AiMessage> conversation) {
@@ -60,14 +71,33 @@ public class AiService {
         if (conversation == null) {
             conversation = new ArrayList<>();
         }
-        String answer = chatClient
-                            .prompt(question)
-                            .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
-                            .call()
-                            .content();
+        String answer;
+        try {
+            answer = chatClient
+                    .prompt(question)
+                    .tools(customerTool)
+                    .advisors(a -> a.param(ChatMemory.CONVERSATION_ID, conversationId))
+                    .call()
+                    .content();
+        } catch (Exception ex) {
+            String rootMessage = getRootMessage(ex);
+            log.error("Gemini call failed: {}", rootMessage, ex);
+            throw new RuntimeException("Gemini call failed: " + rootMessage, ex);
+        }
         conversation.add(new AiMessage("user", question));
         conversation.add(new AiMessage("assistant", answer));
         return conversation;
 
+    }
+
+    private static String getRootMessage(Throwable throwable) {
+        Throwable current = throwable;
+        Throwable last = throwable;
+        while (current != null) {
+            last = current;
+            current = current.getCause();
+        }
+        String message = last.getMessage();
+        return (message == null || message.isBlank()) ? last.getClass().getSimpleName() : message;
     }
 }

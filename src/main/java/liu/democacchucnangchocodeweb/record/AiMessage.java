@@ -1,5 +1,7 @@
 package liu.democacchucnangchocodeweb.record;
 
-public record AiMessage(String author, String content) {
+import java.io.Serializable;
+
+public record AiMessage(String author, String content) implements Serializable {
     
 }
