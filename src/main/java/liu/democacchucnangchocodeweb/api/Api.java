@@ -101,7 +101,7 @@ public class Api {
             session.setAttribute("conversationId", conversationId);
         }
         List<AiMessage> conversation = (List<AiMessage>) session.getAttribute("conversation");
-        conversation = aiService.ask(conversationId, request.question(), conversation);
+        aiService.ask(conversationId, request.question(), conversation);
         session.setAttribute("conversation", conversation);
         return ResponseEntity.ok(conversation);
     }

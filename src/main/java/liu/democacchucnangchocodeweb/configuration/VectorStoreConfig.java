@@ -1,5 +1,7 @@
 package liu.democacchucnangchocodeweb.configuration;
 
+import io.pinecone.clients.Index;
+import io.pinecone.configs.PineconeConnection;
 import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.ai.vectorstore.pinecone.PineconeVectorStore;
@@ -16,6 +18,9 @@ public class VectorStoreConfig {
     @Value("${spring.ai.vectorstore.pinecone.index-name}")
     private String index;
 
+    @Value("${pinecone.index-host}")
+    private String indexHost;
+
 
     @Bean
     public VectorStore pineconeVectorStore(EmbeddingModel embeddingModel) {
@@ -24,5 +29,12 @@ public class VectorStoreConfig {
             .indexName(index)
             .build();
     }
+
+    // @Bean
+    // public Index pineconeIndex() {
+    //     io.pinecone.configs.PineconeConfig config = new io.pinecone.configs.PineconeConfig(apiKey);
+    //     config.setHost(indexHost);
+    //     return new Index(config, new PineconeConnection(config), index);
+    // }
 
 }

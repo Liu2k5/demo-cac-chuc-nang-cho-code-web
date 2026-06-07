@@ -2,12 +2,15 @@ package liu.democacchucnangchocodeweb.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor;
+import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor;
 import org.springframework.ai.chat.memory.ChatMemory;
 import org.springframework.ai.chat.memory.MessageWindowChatMemory;
 import org.springframework.ai.chat.model.ChatModel;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.stereotype.Service;
 
@@ -31,24 +34,28 @@ public class AiService {
         MessageWindowChatMemory.builder()
             .maxMessages(36)
             .build();
-    private final Index pineconeIndex;
+    // private final Index pineconeIndex;
     private final ChatModel chatModel;
     private final CustomerTool customerTool;
 
     public AiService(
                     ChatModel chatModel,
                     VectorStore vectorStore,
+                    // Index pineconeIndex,
                     CustomerService customerService,
                     CustomerTool customerTool) {
         this.customerService = customerService;
         this.vectorStore = vectorStore;
-        this.pineconeIndex = null;
+        // this.pineconeIndex = pineconeIndex;
         this.chatModel = chatModel;
         this.customerTool = customerTool;
 
         this.chatClient = ChatClient.builder(chatModel)
                 .defaultSystem(systemPrompt)
-                .defaultAdvisors(MessageChatMemoryAdvisor.builder(chatMemory).build())
+                .defaultAdvisors(
+                    MessageChatMemoryAdvisor.builder(chatMemory).build(),
+                    QuestionAnswerAdvisor.builder(vectorStore).build()
+                )
                 .build();
         
     }
@@ -62,7 +69,7 @@ public class AiService {
             - vô hiệu hóa tài khoản khách hàng theo username
             """;
 
-    public List<AiMessage> ask(String conversationId, String question, List<AiMessage> conversation) {
+    public void ask(String conversationId, String question, List<AiMessage> conversation) {
         if (question == null || question.isBlank()) {
             throw new RuntimeException("Cau hoi khong duoc de trong");
         } else if (question.length() > 255) {
@@ -86,8 +93,6 @@ public class AiService {
         }
         conversation.add(new AiMessage("user", question));
         conversation.add(new AiMessage("assistant", answer));
-        return conversation;
-
     }
 
     private static String getRootMessage(Throwable throwable) {
@@ -99,5 +104,20 @@ public class AiService {
         }
         String message = last.getMessage();
         return (message == null || message.isBlank()) ? last.getClass().getSimpleName() : message;
+    }
+
+    public void loadDataToVectorDb() {
+//        pineconeIndex.deleteAll("__default__");
+        vectorStore.add(
+                List.of(
+                        new Document("""
+                        Tiêu ngữ nhà nước cộng hòa xã hội chủ nghĩa Việt Nam là:
+                        Độc lập - Tự do - Hạnh phúc.
+
+                        Do you love me?
+                        I do.
+                        """)
+                )
+        );
     }
 }

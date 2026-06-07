@@ -4,6 +4,7 @@ import liu.democacchucnangchocodeweb.entity.Administrator;
 import liu.democacchucnangchocodeweb.entity.Customer;
 import liu.democacchucnangchocodeweb.repository.AdminRepository;
 import liu.democacchucnangchocodeweb.repository.CustomerRepository;
+import liu.democacchucnangchocodeweb.service.AiService;
 import liu.democacchucnangchocodeweb.service.impl.AdminService;
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ public class Initialisation implements CommandLineRunner {
     private final CustomerRepository customerRepository;
     private final CustomerService customerService;
     private final AdminService adminService;
-    private final JdbcTemplate jdbcTemplate;
+    private final AiService aiService;
 
     // annotation Value lấy giá trị với tên tương ứng từ tệp cấu hình (properties hoặc yaml) và gán chúng cho các biến adminUsername và adminPassword.
     @Value("${admin.username}")
@@ -61,6 +62,8 @@ public class Initialisation implements CommandLineRunner {
                         .isEnabled(false)
                         .build();
         customerRepository.saveAll(List.of(customer1, customer2));
+
+        aiService.loadDataToVectorDb();
 
         // // chưa rõ vì sao việc tạo tự động có vấn đề, ghi chú tạm ở đây
         // jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS SPRING_SESSION (PRIMARY_ID CHAR(36) NOT NULL, SESSION_ID CHAR(36) NOT NULL, CREATION_TIME BIGINT NOT NULL, LAST_ACCESS_TIME BIGINT NOT NULL, MAX_INACTIVE_INTERVAL INT NOT NULL, EXPIRY_TIME BIGINT NOT NULL, PRINCIPAL_NAME VARCHAR(100), CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID))");
