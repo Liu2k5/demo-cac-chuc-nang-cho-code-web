@@ -57,9 +57,9 @@ export default function NavigationOptions() {
                             >Đăng xuất</Link>
                         } </p>
                         <p>
-                            {/*<ProtectedRoute user={user} roleRequired={"ADMIN"}>*/}
+                            <ProtectedRoute user={user} roleRequired={"ADMIN"}>
                                 <Link to="/admin/manage-customer">Trang quản lí khách hàng</Link>
-                            {/*</ProtectedRoute>*/}
+                            </ProtectedRoute>
                         </p>
                     </div>
                 } />

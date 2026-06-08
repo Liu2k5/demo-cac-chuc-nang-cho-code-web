@@ -47,4 +47,15 @@ public class CustomerTool {
             return "ERROR: " + e.getMessage();
         }
     }
+
+    @Tool(name = "delete_customer", description = "Xóa tài khoản khách hàng theo username")
+    public String deleteCustomer(String username) {
+        try {
+            customerService.deleteByUsername(username);
+            return "CUSTOMER_DELETED";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "ERROR: " + e.getMessage();
+        }
+    }
 }

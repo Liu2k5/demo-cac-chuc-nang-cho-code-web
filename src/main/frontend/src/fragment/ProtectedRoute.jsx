@@ -1,7 +1,7 @@
 import {Navigate} from "react-router";
 
 // hàm bọc các đường dẫn cần bảo vệ, kiểm tra xem đã đăng nhập chưa và có quyền truy cập không
-export default function ProtectedRoute({ user, roleRequired, children }) {
+export default function ProtectedRoute({user, roleRequired, children }) {
     // 1. Kiểm tra nếu chưa đăng nhập
     if (!user || Object.keys(user).length === 0) {
         return <Navigate to="/login" replace />;

@@ -15,9 +15,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.web.cors.CorsConfiguration;
-
-import java.util.List;
 
 @Configuration
 // kích hoạt tính năng Web Security trong ứng dụng Spring Boot, cho phép cấu hình bảo mật cho các endpoint và xác thực người dùng.
@@ -74,12 +71,13 @@ public class Security {
                 // thêm filter kiểm tra định dạng các trường nhập trước khi thực hiện xác thực
 //                .addFilterBefore(loginRequestValidationFilter, UsernamePasswordAuthenticationFilter.class)
                 // phân quyền truy cập
+                
                 .authorizeHttpRequests(i -> i
-                        .requestMatchers("/api/auth/logout").hasAnyRole("ADMIN", "CUSTOMER")
+                        .requestMatchers("/api/auth/logout").authenticated()
                         .requestMatchers(ALL_ALLOWED).permitAll()
                         .requestMatchers(ADMIN_ALLOWED).hasRole("ADMIN")
                         .requestMatchers(CUSTOMER_ALLOWED).hasRole("CUSTOMER")
-                        .anyRequest().permitAll()
+                        .anyRequest().authenticated()
                 )
                 // cấu hình CSRF, bỏ qua kiểm tra CSRF cho endpoint "/webhook" để cho phép các yêu cầu từ bên ngoài mà không cần token CSRF.
                 .csrf(csrf -> csrf.disable())

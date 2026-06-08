@@ -67,6 +67,7 @@ public class AiService {
             - kiểm tra tên hiển thị của khách hàng theo username; trả về tên hoặc 'NOT_FOUND'
             - kích hoạt tài khoản khách hàng theo username
             - vô hiệu hóa tài khoản khách hàng theo username
+            - xóa tài khoản khách hàng theo username
             """;
 
     public void ask(String conversationId, String question, List<AiMessage> conversation) {

@@ -12,7 +12,10 @@ export default function Login() {
         const params = new URLSearchParams();
         params.append("username", username);
         params.append("password", password);
-        axios.post("/login", params).then(() => navigate("/"))
+        axios.post("/login", params).then(() => {
+            
+            navigate("/");
+        })
             // hứng lỗi trả về từ backend, từ loginFailureHandler()
             .catch((error) => {
                 if (error.response && error.response.data) {

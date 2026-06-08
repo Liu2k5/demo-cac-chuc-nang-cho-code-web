@@ -16,6 +16,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @Component
 @RequiredArgsConstructor
@@ -63,7 +64,8 @@ public class Initialisation implements CommandLineRunner {
                         .build();
         customerRepository.saveAll(List.of(customer1, customer2));
 
-        aiService.loadDataToVectorDb();
+        // chạy bất đồng bộ
+        CompletableFuture.runAsync(() -> aiService.loadDataToVectorDb());
 
         // // chưa rõ vì sao việc tạo tự động có vấn đề, ghi chú tạm ở đây
         // jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS SPRING_SESSION (PRIMARY_ID CHAR(36) NOT NULL, SESSION_ID CHAR(36) NOT NULL, CREATION_TIME BIGINT NOT NULL, LAST_ACCESS_TIME BIGINT NOT NULL, MAX_INACTIVE_INTERVAL INT NOT NULL, EXPIRY_TIME BIGINT NOT NULL, PRINCIPAL_NAME VARCHAR(100), CONSTRAINT SPRING_SESSION_PK PRIMARY KEY (PRIMARY_ID))");
