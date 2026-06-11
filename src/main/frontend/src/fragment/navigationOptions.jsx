@@ -4,6 +4,7 @@ import {Link, Route, Routes} from "react-router-dom";
 import {useEffect, useState} from "react";
 import axios from "axios";
 import ProtectedRoute from "./ProtectedRoute";
+import Orders from "../customer/orders";
 
 export default function NavigationOptions() {
     const navigate = useNavigate();
@@ -57,12 +58,16 @@ export default function NavigationOptions() {
                             >Đăng xuất</Link>
                         } </p>
                         <p>
-                            <ProtectedRoute user={user} roleRequired={"ADMIN"}>
+                            {/* <ProtectedRoute user={user} roleRequired={"ADMIN"}> */}
                                 <Link to="/admin/manage-customer">Trang quản lí khách hàng</Link>
-                            </ProtectedRoute>
+                            {/* </ProtectedRoute> */}
+                        </p>
+                        <p>
+                            <Link to="/customer/orders">Danh sách đơn hàng</Link>
                         </p>
                     </div>
                 } />
+                <Route path="/customer/orders" element={<Orders/>} />
                 <Route path="/admin/manage-customer" element={
                     <div>
                         <h3>Bạn đương ở trang quản lí khách hàng</h3>
@@ -86,7 +91,6 @@ export default function NavigationOptions() {
                         <p>Chuyển về trang chủ: <a href="/" >dùng thẻ a</a> / <Link to="/">Dùng thẻ Link</Link> / <a href="#" onClick={() => navigate("/")}>dùng useNavigate() với sự kiện onClick()</a> </p>
                     </div>
                 } />
-                {}
                 <Route path="/login" element={
                     <div>
                         <h3>Bạn đương ở trang đăng nhập</h3>

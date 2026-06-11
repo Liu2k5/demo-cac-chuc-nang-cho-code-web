@@ -29,24 +29,24 @@ public class AiService {
 
     private final CustomerService customerService;
     private final VectorStore vectorStore;
+    private final Index pineconeIndex;
     private final ChatClient chatClient;
     private final ChatMemory chatMemory = 
         MessageWindowChatMemory.builder()
             .maxMessages(36)
             .build();
-    // private final Index pineconeIndex;
     private final ChatModel chatModel;
     private final CustomerTool customerTool;
 
     public AiService(
                     ChatModel chatModel,
                     VectorStore vectorStore,
-                    // Index pineconeIndex,
+                    Index pineconeIndex,
                     CustomerService customerService,
                     CustomerTool customerTool) {
         this.customerService = customerService;
         this.vectorStore = vectorStore;
-        // this.pineconeIndex = pineconeIndex;
+        this.pineconeIndex = pineconeIndex;
         this.chatModel = chatModel;
         this.customerTool = customerTool;
 
@@ -108,7 +108,7 @@ public class AiService {
     }
 
     public void loadDataToVectorDb() {
-//        pineconeIndex.deleteAll("__default__");
+        pineconeIndex.deleteAll("__default__");
         vectorStore.add(
                 List.of(
                         new Document("""

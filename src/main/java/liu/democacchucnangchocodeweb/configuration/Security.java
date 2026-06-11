@@ -28,6 +28,7 @@ public class Security {
     private final String[] CUSTOMER_ALLOWED = {"/customer/**", "/api/customer/**"};
 
     private final LoginRequestValidationFilter loginRequestValidationFilter;
+    
     @Bean
     // "springSecurityFilterChain" trùng tên với bean mặc định của Spring Security
     public SecurityFilterChain securityFilterChain(HttpSecurity http){

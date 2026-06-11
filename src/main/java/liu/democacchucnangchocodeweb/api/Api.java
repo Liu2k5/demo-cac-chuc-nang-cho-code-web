@@ -1,9 +1,11 @@
 package liu.democacchucnangchocodeweb.api;
 
 import liu.democacchucnangchocodeweb.entity.Customer;
+import liu.democacchucnangchocodeweb.entity.Order;
 import liu.democacchucnangchocodeweb.record.AiMessage;
 import liu.democacchucnangchocodeweb.record.AiMessageRecord;
 import liu.democacchucnangchocodeweb.service.AiService;
+import liu.democacchucnangchocodeweb.service.OrderService;
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.UUID;
 
@@ -24,9 +27,12 @@ import java.util.UUID;
 public class Api {
     public static final String API = "/api";
     public static final String ADMIN = API + "/admin";
+    public static final String CUSTOMER = API + "/customer";
+
 
     private final CustomerService customerService;
     private final AiService aiService;
+    private final OrderService orderService;
 
     @GetMapping(ADMIN + "/manage-customer") // Đường dẫn: /api/admin/customers
     public List<Customer> getCustomers() { // 3. Sửa kiểu trả về thành List<User> cho khớp với Service
@@ -104,5 +110,12 @@ public class Api {
         aiService.ask(conversationId, request.question(), conversation);
         session.setAttribute("conversation", conversation);
         return ResponseEntity.ok(conversation);
+    }
+
+    @GetMapping(CUSTOMER + "/orders")
+    public List<Order> getOrders(Principal principal) {
+        String username = principal.getName();
+        Customer customer = customerService.findByUsername(username);
+        return orderService.findByCustomer_Username(customer.getUsername());
     }
 }

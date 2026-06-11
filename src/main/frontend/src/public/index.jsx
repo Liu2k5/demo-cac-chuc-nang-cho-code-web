@@ -41,9 +41,9 @@ export default function Home() {
                     </>
                 }/>
                 <Route path={"/admin/manage-customer"} element={
-                    <ProtectedRoute user={user} roleRequired={"ADMIN"}>
+                    // <ProtectedRoute user={user} roleRequired={"ADMIN"}>
                         <ManageCustomer/>
-                    </ProtectedRoute>
+                    // </ProtectedRoute>
                 }/>
                 <Route path={"/login"} element={
                     <Login/>

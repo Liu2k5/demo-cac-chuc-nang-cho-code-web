@@ -2,12 +2,15 @@ package liu.democacchucnangchocodeweb.configuration;
 
 import liu.democacchucnangchocodeweb.entity.Administrator;
 import liu.democacchucnangchocodeweb.entity.Customer;
+import liu.democacchucnangchocodeweb.entity.Order;
 import liu.democacchucnangchocodeweb.repository.AdminRepository;
 import liu.democacchucnangchocodeweb.repository.CustomerRepository;
+import liu.democacchucnangchocodeweb.repository.OrderRepository;
 import liu.democacchucnangchocodeweb.service.AiService;
 import liu.democacchucnangchocodeweb.service.impl.AdminService;
 import liu.democacchucnangchocodeweb.service.impl.CustomerService;
 import lombok.RequiredArgsConstructor;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -24,9 +27,8 @@ public class Initialisation implements CommandLineRunner {
     private static final Logger log = LoggerFactory.getLogger(Initialisation.class);
     private final AdminRepository adminRepository;
     private final CustomerRepository customerRepository;
-    private final CustomerService customerService;
-    private final AdminService adminService;
     private final AiService aiService;
+    private final OrderRepository orderRepository;
 
     // annotation Value lấy giá trị với tên tương ứng từ tệp cấu hình (properties hoặc yaml) và gán chúng cho các biến adminUsername và adminPassword.
     @Value("${admin.username}")
@@ -64,6 +66,14 @@ public class Initialisation implements CommandLineRunner {
                         .build();
         customerRepository.saveAll(List.of(customer1, customer2));
 
+        Order order1 = 
+                Order.builder()
+                    .customer(customer1)
+                    .totalAmount(3618L)
+                    .paid(false)
+                    .build();
+        orderRepository.saveAll(List.of(order1));
+
         // chạy bất đồng bộ
         CompletableFuture.runAsync(() -> aiService.loadDataToVectorDb());
 
@@ -76,8 +86,11 @@ public class Initialisation implements CommandLineRunner {
         // System.out.println("--- Spring Session tables checked/created ---");
 
         System.out.println("Du lieu da duoc luu:");
-        System.out.println("Admin: " + adminService.findAll().stream().map(u -> u.getUsername()).toList().toString());
-        System.out.println("Customer: " + customerService.findAll().stream().map(u -> u. getUsername()).toList().toString());
+        System.out.println("Admin: " + adminRepository.findAll().stream().map(u -> u.getUsername()).toList().toString());
+        System.out.println("Customer: " + customerRepository.findAll().stream().map(u -> u.getUsername()).toList().toString());
+        System.out.println("Order: " + orderRepository.findAll().stream().map(u -> (
+            u.getCustomer().getUsername() + ": " + u.getId() + ", " + u.getTotalAmount())
+        ).toList().toString());
     }
 
 }

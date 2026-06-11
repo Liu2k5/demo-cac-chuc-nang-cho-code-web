@@ -30,11 +30,11 @@ public class VectorStoreConfig {
             .build();
     }
 
-    // @Bean
-    // public Index pineconeIndex() {
-    //     io.pinecone.configs.PineconeConfig config = new io.pinecone.configs.PineconeConfig(apiKey);
-    //     config.setHost(indexHost);
-    //     return new Index(config, new PineconeConnection(config), index);
-    // }
+    @Bean
+    public Index pineconeIndex() {
+        io.pinecone.configs.PineconeConfig config = new io.pinecone.configs.PineconeConfig(apiKey);
+        config.setHost(indexHost);
+        return new Index(new PineconeConnection(config), index);
+    }
 
 }
