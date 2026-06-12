@@ -20,6 +20,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.UUID;
 
+
 @Slf4j
 @RestController // 1. Sửa từ @Controller thành @RestController
 @RequiredArgsConstructor
@@ -118,4 +119,19 @@ public class Api {
         Customer customer = customerService.findByUsername(username);
         return orderService.findByCustomer_Username(customer.getUsername());
     }
+
+    @PostMapping(CUSTOMER + "/pay")
+    public String pay(
+        @RequestAttribute String orderId,
+        Principal principal) {
+        long fetchedOrderId;
+        try {
+            fetchedOrderId = Long.parseLong(orderId);
+            return orderService.getCheckoutUrlByOrderId(fetchedOrderId);
+        } catch (Exception e) {
+            System.err.println("error in parsing number");
+            return null;
+        }
+    }
+    
 }

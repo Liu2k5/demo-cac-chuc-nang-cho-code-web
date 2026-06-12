@@ -1,11 +1,21 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import axios from "axios";
 
 export default function Orders() {
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [paymentUrl, setPaymentUrl] = useState("");
+    const navigate = useNavigate();
+    
 
     const handlePay = (id) => {
+        axios.put("/api/customer/pay", id).then(data => setPaymentUrl(data.data))
+        .finally(() => {
+            if (paymentUrl) {
+                navigate(paymentUrl);
+            }
+        });
         
     };
 
