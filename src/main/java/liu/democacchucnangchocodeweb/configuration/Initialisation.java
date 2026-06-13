@@ -68,6 +68,7 @@ public class Initialisation implements CommandLineRunner {
 
         Order order1 = 
                 Order.builder()
+                    .id(2L)
                     .customer(customer1)
                     .totalAmount(3618L)
                     .paid(false)

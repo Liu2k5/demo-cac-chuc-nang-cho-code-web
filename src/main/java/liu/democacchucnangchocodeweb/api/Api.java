@@ -1,5 +1,6 @@
 package liu.democacchucnangchocodeweb.api;
 
+import liu.democacchucnangchocodeweb.dto.PaymentConfirmationDto;
 import liu.democacchucnangchocodeweb.entity.Customer;
 import liu.democacchucnangchocodeweb.entity.Order;
 import liu.democacchucnangchocodeweb.record.AiMessage;
@@ -122,14 +123,16 @@ public class Api {
 
     @PostMapping(CUSTOMER + "/pay")
     public String pay(
-        @RequestAttribute String orderId,
+        @RequestBody PaymentConfirmationDto data,
         Principal principal) {
-        long fetchedOrderId;
+        // long fetchedOrderId;
         try {
-            fetchedOrderId = Long.parseLong(orderId);
-            return orderService.getCheckoutUrlByOrderId(fetchedOrderId);
+            // fetchedOrderId = Long.parseLong(data.orderId());
+            String fetchedUrl = orderService.getCheckoutUrlByOrderId(data.orderId());
+            System.out.println(fetchedUrl);
+            return fetchedUrl;
         } catch (Exception e) {
-            System.err.println("error in parsing number");
+            System.err.println("error in parsing number: " + data.orderId());
             return null;
         }
     }

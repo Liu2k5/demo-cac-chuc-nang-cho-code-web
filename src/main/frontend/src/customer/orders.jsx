@@ -10,12 +10,14 @@ export default function Orders() {
     
 
     const handlePay = (id) => {
-        axios.put("/api/customer/pay", id).then(data => setPaymentUrl(data.data))
-        .finally(() => {
-            if (paymentUrl) {
+        axios.post("/api/customer/pay", {orderId: id}).then(data => {
+            const url = data.data;
+            setPaymentUrl(url);
+            if (url) {
                 navigate(paymentUrl);
             }
-        });
+        })
+        .catch((e) => console.error("Error calling api pay: " + e));
         
     };
 
@@ -32,7 +34,7 @@ export default function Orders() {
         <>
             <p>Danh sách đơn hàng</p>
             {orders.map((o) => (
-                <p>{o.id} {o.totalAmount} <span><button onClick={handlePay(o.id)} disabled={o.paid} >Thanh toan</button></span></p>
+                <p>{o.id} {o.totalAmount} <span><button onClick={() => handlePay(o.id)} disabled={o.paid} >Thanh toan</button></span></p>
             ))}
         </>
     );
