@@ -18,6 +18,7 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -48,32 +49,40 @@ public class Initialisation implements CommandLineRunner {
                                 .build();
             adminRepository.save(admin);
         }
-        Customer customer1 =
-                Customer.builder()
-                        .username("customer1")
-                        .password("password")
-                        .name("Customer One")
-                        .emailAddress("customer1@mail.com")
-                        .isEnabled(true)
+        if (customerRepository.count() == 0) {
+            List<Customer> customers = new ArrayList<>();
+            for (int i = 0; i < 20; i++) {
+                Customer customer =
+                        Customer.builder()
+                                .username("customer" + i)
+                                .password("password")
+                                .name("Customer " + i)
+                                .emailAddress("customer" + i + "@mail.com")
+                                .isEnabled(i % 2 == 0) // Kích hoạt cho các khách hàng có chỉ số chẵn
+                                .build();
+                customers.add(customer);
+            }
+    
+            customerRepository.saveAll(customers);
+            Customer customer1 = customers.get(0);
+            Customer customer2 = customers.get(1);
+    
+            Order order1 = 
+                    Order.builder()
+                        .id(2L)
+                        .customer(customer1)
+                        .totalAmount(3618L)
+                        .paid(false)
                         .build();
-        Customer customer2 =
-                Customer.builder()
-                        .username("customer2")
-                        .password("password")
-                        .name("Customer One")
-                        .emailAddress("customer2@mail.com")
-                        .isEnabled(false)
+            Order order2 = 
+                    Order.builder()
+                        .id(3L)
+                        .customer(customer2)
+                        .totalAmount(5000L)
+                        .paid(true)
                         .build();
-        customerRepository.saveAll(List.of(customer1, customer2));
-
-        Order order1 = 
-                Order.builder()
-                    .id(2L)
-                    .customer(customer1)
-                    .totalAmount(3618L)
-                    .paid(false)
-                    .build();
-        orderRepository.saveAll(List.of(order1));
+            orderRepository.saveAll(List.of(order1, order2));
+        }
 
         // chạy bất đồng bộ
         CompletableFuture.runAsync(() -> aiService.loadDataToVectorDb());

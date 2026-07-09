@@ -1,12 +1,16 @@
 package liu.democacchucnangchocodeweb.service.impl;
 
 import jakarta.transaction.Transactional;
+import liu.democacchucnangchocodeweb.dto.CustomerPageResponse;
 import liu.democacchucnangchocodeweb.entity.Customer;
 import liu.democacchucnangchocodeweb.listener.event.DisableEvent;
 import liu.democacchucnangchocodeweb.repository.CustomerRepository;
 import liu.democacchucnangchocodeweb.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,8 +22,19 @@ public class CustomerService implements UserService {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     @Override
-    public List<Customer> findAll() {
-        return customerRepository.findAll();
+    public List<Customer> findAll(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        return customerRepository.findAll(pageable).getContent();
+    }
+
+    public CustomerPageResponse findPage(int page, int size, String sortBy) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortBy));
+        org.springframework.data.domain.Page<Customer> pageResult = customerRepository.findAll(pageable);
+        return new CustomerPageResponse(
+            pageResult.getContent(),
+            pageResult.getTotalElements(),
+            pageResult.hasNext()
+        );
     }
 
     @Override
@@ -46,5 +61,10 @@ public class CustomerService implements UserService {
         customerRepository.save(customer);
         // kích hoạt event để lisstener tại DisableListener thấy và thực hiện hành động khóa tài khoản trong Spring Security
         applicationEventPublisher.publishEvent(new DisableEvent(customer.getUsername()));
+    }
+
+    @Override
+    public List findAll() {
+        return customerRepository.findAll();
     }
 }

@@ -4,19 +4,47 @@ import axios from "axios";
 export default function ManageCustomer() {
     const [customers, setCustomers] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [hasMore, setHasMore] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const PAGE_SIZE = 5;
     const [conversation, setConversation] = useState([]);
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
     const [chatError, setChatError] = useState("");
 
+    // Tải trang đầu tiên
     const handleRefresh = async () => {
+        setLoading(true);
+        setCurrentPage(0);
         try {
-            const response = await axios.get("/api/admin/manage-customer");
-            setCustomers(response.data);
+            const response = await axios.get("/api/admin/manage-customer", {
+                params: { page: 0, size: PAGE_SIZE, sortBy: "username" }
+            });
+            setCustomers(response.data.customers);
+            setHasMore(response.data.hasMore);
         } catch (error) {
             console.error("Lỗi khi lấy dữ liệu:", error);
         } finally {
             setLoading(false);
+        }
+    };
+
+    // Tải thêm trang tiếp theo
+    const handleLoadMore = async () => {
+        const nextPage = currentPage + 1;
+        setLoadingMore(true);
+        try {
+            const response = await axios.get("/api/admin/manage-customer", {
+                params: { page: nextPage, size: PAGE_SIZE, sortBy: "username" }
+            });
+            setCustomers(prev => [...prev, ...response.data.customers]);
+            setHasMore(response.data.hasMore);
+            setCurrentPage(nextPage);
+        } catch (error) {
+            console.error("Lỗi khi tải thêm dữ liệu:", error);
+        } finally {
+            setLoadingMore(false);
         }
     };
 
@@ -78,6 +106,7 @@ export default function ManageCustomer() {
             {loading ? (
                 <p>Đang tải dữ liệu...</p>
             ) : (
+                <>
                 <ul>
                     {customers.length > 0 ? (
                         customers.map((customer, index) => (
@@ -99,6 +128,27 @@ export default function ManageCustomer() {
                         <p>Không có dữ liệu</p>
                     )}
                 </ul>
+                    {hasMore ? (
+                        <div style={{ textAlign: "center", marginTop: 12 }}>
+                            <button
+                                onClick={handleLoadMore}
+                                disabled={loadingMore}
+                                style={{
+                                    border: "none",
+                                    borderRadius: 999,
+                                    padding: "8px 16px",
+                                    background: loadingMore ? "#93c5fd" : "#1d4ed8",
+                                    color: "white",
+                                    cursor: loadingMore ? "not-allowed" : "pointer",
+                                }}
+                            >
+                                {loadingMore ? "Đang tải..." : "Xem thêm"}
+                            </button>
+                        </div>
+                    ) : customers.length > 0 ? (
+                        <p style={{ textAlign: "center", color: "#6b7280", marginTop: 12 }}>Đã hiển thị tất cả</p>
+                    ) : null}
+                </>
             )}
 
             <br />

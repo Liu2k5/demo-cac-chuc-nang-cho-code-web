@@ -87,7 +87,8 @@ export default function NavigationOptions() {
                             <Link to="/login">Đăng nhập</Link> :
                             <Link to="#"
                                   onClick={handleLogout}
-                            >Đăng xuất</Link>                        } </p>
+                            >Đăng xuất</Link>                        
+                            } </p>
                         <p>Chuyển về trang chủ: <a href="/" >dùng thẻ a</a> / <Link to="/">Dùng thẻ Link</Link> / <a href="#" onClick={() => navigate("/")}>dùng useNavigate() với sự kiện onClick()</a> </p>
                     </div>
                 } />

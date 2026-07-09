@@ -1,5 +1,6 @@
 package liu.democacchucnangchocodeweb.api;
 
+import liu.democacchucnangchocodeweb.dto.CustomerPageResponse;
 import liu.democacchucnangchocodeweb.dto.PaymentConfirmationDto;
 import liu.democacchucnangchocodeweb.entity.Customer;
 import liu.democacchucnangchocodeweb.entity.Order;
@@ -17,9 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.security.Principal;
 import java.util.ArrayList;
-import java.util.UUID;
 
 
 @Slf4j
@@ -36,10 +37,27 @@ public class Api {
     private final AiService aiService;
     private final OrderService orderService;
 
-    @GetMapping(ADMIN + "/manage-customer") // Đường dẫn: /api/admin/customers
-    public List<Customer> getCustomers() { // 3. Sửa kiểu trả về thành List<User> cho khớp với Service
+    // Lưu conversation trong memory thay vì session attribute để tránh lỗi duplicate key với Spring Session JDBC
+    private final ConcurrentHashMap<String, List<AiMessage>> conversations = new ConcurrentHashMap<>();
+
+    @GetMapping(ADMIN + "/manage-customer") // Đường dẫn: /api/admin/customers (có query params)
+    public CustomerPageResponse getCustomers(
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "5") int size,
+        @RequestParam(defaultValue = "username") String sortBy
+    ) {
+        System.out.println("get customers page " + page + " size " + size);
+        return customerService.findPage(page, size, sortBy);
+    }
+
+    @GetMapping(ADMIN + "/manage-customer/{sortBy}/{page}/{size}") // Đường dẫn: /api/admin/customers có phân trang
+    public List<Customer> getCustomers(
+        @PathVariable String sortBy,
+        @PathVariable int page,
+        @PathVariable int size
+    ) {
         System.out.println("get all customers");
-        return customerService.findAll();
+        return customerService.findAll(page, size, sortBy);
     }
 
     // việc truyền tham sô lên url là nguy hiểm, nhưng chấp nhận được nếu hệ thống sử dụng phân quyền
@@ -82,35 +100,18 @@ public class Api {
     }
 
     @GetMapping(ADMIN + "/ai")
-    @SuppressWarnings("unchecked")
     public List<AiMessage> Ai(HttpSession session) {
-        String conversationId = (String) session.getAttribute("conversationId");
-        List<AiMessage> conversation = (List<AiMessage>) session.getAttribute("conversation");
-        if (conversationId == null) {
-            conversationId = UUID.randomUUID().toString();
-            session.setAttribute("conversationId", conversationId);
-        }
-        if (conversation == null) {
-            conversation = new ArrayList<>();
-            session.setAttribute("conversation", conversation);
-        }
-        return conversation;
+        return conversations.computeIfAbsent(session.getId(), k -> new ArrayList<>());
     }
 
     @PostMapping(ADMIN + "/ai")
-    @SuppressWarnings("unchecked")
     public ResponseEntity<List<AiMessage>> Ai(
         @RequestBody AiMessageRecord request,
         HttpSession session
     ) {
-        String conversationId = (String) session.getAttribute("conversationId");
-        if (conversationId == null) {
-            conversationId = UUID.randomUUID().toString();
-            session.setAttribute("conversationId", conversationId);
-        }
-        List<AiMessage> conversation = (List<AiMessage>) session.getAttribute("conversation");
+        String conversationId = session.getId();
+        List<AiMessage> conversation = conversations.computeIfAbsent(conversationId, k -> new ArrayList<>());
         aiService.ask(conversationId, request.question(), conversation);
-        session.setAttribute("conversation", conversation);
         return ResponseEntity.ok(conversation);
     }
 

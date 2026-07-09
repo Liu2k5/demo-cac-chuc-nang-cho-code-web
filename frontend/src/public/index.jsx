@@ -31,13 +31,14 @@ export default function Home() {
     return (
         <>
             {/*<p>{user}</p>*/}
+            <p>Vị trí của các tệp js trong cây thư mục tách biệt với đường dẫn trên trình duyệt</p>
+            <p>Các chi tiết đều được gói trong các component, và các component được hiển thị
+                khi là một trong các thành phần được truyền vào thuộc tính element của thẻ Route</p>
+                
             <NavigationOptions/>
             <Routes>
                 <Route path={"/"} element={
                     <>
-                        <p>Vị trí của các tệp js trong cây thư mục tách biệt với đường dẫn trên trình duyệt</p>
-                        <p>Các chi tiết đều được gói trong các component, và các component được hiển thị
-                            khi là một trong các thành phần được truyền vào thuộc tính element của thẻ Route</p>
                     </>
                 }/>
                 <Route path={"/admin/manage-customer"} element={
